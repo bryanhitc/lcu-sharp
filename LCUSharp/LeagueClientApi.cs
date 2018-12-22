@@ -47,7 +47,7 @@ namespace LCUSharp
         /// <param name="e">The event arguments.</param>
         private void OnProcessExited(object sender, EventArgs e)
         {
-            Disconnected(sender, e);
+            Disconnected?.Invoke(sender, e);
         }
     }
 }
