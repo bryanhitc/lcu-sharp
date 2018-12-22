@@ -12,11 +12,5 @@ namespace LCUSharp
         /// The request handler.
         /// </summary>
         LeagueRequestHandler RequestHandler { get; }
-
-        /// <summary>
-        /// Connects to the league client's API.
-        /// </summary>
-        /// <returns></returns>
-        Task ConnectAsync();
     }
 }

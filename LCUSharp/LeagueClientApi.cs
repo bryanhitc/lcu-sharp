@@ -10,39 +10,29 @@ namespace LCUSharp
     {
         public event EventHandler Disconnected;
 
-        private readonly LeagueProcessHandler _processHandler;
-        private readonly LockFileHandler _lockFileHandler;
-
         /// <inheritdoc />
         public LeagueRequestHandler RequestHandler { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LeagueClientApi"/> class.
         /// </summary>
-        public LeagueClientApi()
+        /// <param name="port">The league client API's port.</param>
+        /// <param name="token">The authentication token.</param>
+        private LeagueClientApi(int port, string token)
         {
-            _lockFileHandler = new LockFileHandler();
-            _processHandler = new LeagueProcessHandler();
-            _processHandler.Exited += OnProcessExited;
+            RequestHandler = new LeagueRequestHandler(port, token);
         }
 
         /// <inheritdoc />
-        public async Task ConnectAsync()
+        public static async Task<LeagueClientApi> ConnectAsync()
         {
-            await _processHandler.WaitForProcessAsync().ConfigureAwait(false);
-            var (port, token) = await _lockFileHandler.ParseLockFileAsync(_processHandler.BasePath).ConfigureAwait(false);
+            var processHandler = new LeagueProcessHandler();
+            var lockFileHandler = new LockFileHandler();
 
-            InitRequestHandlerAndEndpoints(port, token);
-        }
+            await processHandler.WaitForProcessAsync().ConfigureAwait(false);
+            var (port, token) = await lockFileHandler.ParseLockFileAsync(processHandler.BasePath).ConfigureAwait(false);
 
-        /// <summary>
-        /// Initializes the <see cref="LeagueRequestHandler"/> and endpoints.
-        /// </summary>
-        /// <param name="port">The league client API's port.</param>
-        /// <param name="token">The authentication token.</param>
-        private void InitRequestHandlerAndEndpoints(int port, string token)
-        {
-            RequestHandler = new LeagueRequestHandler(port, token);
+            return new LeagueClientApi(port, token);
         }
 
         /// <summary>

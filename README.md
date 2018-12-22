@@ -6,8 +6,7 @@ For the LCU API documentation, check out [Rift Explorer.](https://github.com/Pup
 ## Usage
 ```cs
 // Initialize a connection to the league client.
-var api = new LeagueClientApi();
-await api.ConnectAsync();
+var api = await LeagueClientApi.ConnectAsync();
 
 // Update the current summoner's profile icon to 23.
 var body = new { profileIconId = 23 };
