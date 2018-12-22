@@ -11,4 +11,7 @@ var api = await LeagueClientApi.ConnectAsync();
 // Update the current summoner's profile icon to 23.
 var body = new { profileIconId = 23 };
 var json = await api.RequestHandler.GetJsonResponseAsync(HttpMethod.Put, "lol-summoner/v1/current-summoner/icon", body);
+
+// Show the client.
+await api.RiotClientEndpoint.ShowUxAsync();
 ```
