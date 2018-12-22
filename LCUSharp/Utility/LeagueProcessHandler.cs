@@ -70,7 +70,7 @@ namespace LCUSharp.Utility
         /// <param name="e">The event arguments.</param>
         private void OnProcessExited(object sender, EventArgs e)
         {
-            Exited(sender, e);
+            Exited?.Invoke(sender, e);
         }
     }
 }

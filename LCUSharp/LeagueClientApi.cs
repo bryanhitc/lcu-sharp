@@ -1,4 +1,5 @@
-﻿using LCUSharp.Http;
+﻿using LCUSharp.Endpoints.RiotClient;
+using LCUSharp.Http;
 using LCUSharp.Utility;
 using System;
 using System.Threading.Tasks;
@@ -11,7 +12,10 @@ namespace LCUSharp
         public event EventHandler Disconnected;
 
         /// <inheritdoc />
-        public LeagueRequestHandler RequestHandler { get; private set; }
+        public LeagueRequestHandler RequestHandler { get; }
+
+        /// <inheritdoc />
+        public IRiotClientEndpoint RiotClientEndpoint { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LeagueClientApi"/> class.
@@ -21,6 +25,7 @@ namespace LCUSharp
         private LeagueClientApi(int port, string token)
         {
             RequestHandler = new LeagueRequestHandler(port, token);
+            RiotClientEndpoint = new RiotClientEndpoint(RequestHandler);
         }
 
         /// <inheritdoc />

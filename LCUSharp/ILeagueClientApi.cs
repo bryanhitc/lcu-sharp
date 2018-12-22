@@ -1,5 +1,5 @@
-﻿using LCUSharp.Http;
-using System.Threading.Tasks;
+﻿using LCUSharp.Endpoints.RiotClient;
+using LCUSharp.Http;
 
 namespace LCUSharp
 {
@@ -12,5 +12,10 @@ namespace LCUSharp
         /// The request handler.
         /// </summary>
         LeagueRequestHandler RequestHandler { get; }
+
+        /// <summary>
+        /// The riot client endpoint.
+        /// </summary>
+        IRiotClientEndpoint RiotClientEndpoint { get; }
     }
 }
