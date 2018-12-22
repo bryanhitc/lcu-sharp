@@ -1,4 +1,5 @@
-﻿using LCUSharp.Endpoints.RiotClient;
+﻿using LCUSharp.Endpoints.ProcessControl;
+using LCUSharp.Endpoints.RiotClient;
 using LCUSharp.Http;
 using LCUSharp.Utility;
 using System;
@@ -17,6 +18,9 @@ namespace LCUSharp
         /// <inheritdoc />
         public IRiotClientEndpoint RiotClientEndpoint { get; }
 
+        /// <inheritdoc />
+        public IProcessControlEndpoint ProcessControlEndpoint { get; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LeagueClientApi"/> class.
         /// </summary>
@@ -26,6 +30,7 @@ namespace LCUSharp
         {
             RequestHandler = new LeagueRequestHandler(port, token);
             RiotClientEndpoint = new RiotClientEndpoint(RequestHandler);
+            ProcessControlEndpoint = new ProcessControlEndpoint(RequestHandler);
         }
 
         /// <inheritdoc />

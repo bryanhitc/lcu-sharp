@@ -1,4 +1,5 @@
-﻿using LCUSharp.Endpoints.RiotClient;
+﻿using LCUSharp.Endpoints.ProcessControl;
+using LCUSharp.Endpoints.RiotClient;
 using LCUSharp.Http;
 
 namespace LCUSharp
@@ -17,5 +18,10 @@ namespace LCUSharp
         /// The riot client endpoint.
         /// </summary>
         IRiotClientEndpoint RiotClientEndpoint { get; }
+
+        /// <summary>
+        /// The process control endpoint.
+        /// </summary>
+        IProcessControlEndpoint ProcessControlEndpoint { get; }
     }
 }
