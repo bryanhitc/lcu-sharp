@@ -48,7 +48,7 @@ namespace LCUSharp.Http
         /// <returns>The <see cref="HttpResponseMessage"/>'s content.</returns>
         public async Task<string> GetJsonResponseAsync(HttpMethod httpMethod, string relativeUrl, IEnumerable<string> queryParameters = null)
         {
-            return await GetJsonResponseAsync<object>(httpMethod, relativeUrl, null, queryParameters).ConfigureAwait(false);
+            return await GetJsonResponseAsync<object>(httpMethod, relativeUrl, queryParameters, null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -60,9 +60,9 @@ namespace LCUSharp.Http
         /// <param name="queryParameters">The query parameters.</param>
         /// <param name="body">The request's body.</param>
         /// <returns>The <see cref="HttpResponseMessage"/>'s content.</returns>
-        public async Task<string> GetJsonResponseAsync<TRequest>(HttpMethod httpMethod, string relativeUrl, TRequest body, IEnumerable<string> queryParameters = null)
+        public async Task<string> GetJsonResponseAsync<TRequest>(HttpMethod httpMethod, string relativeUrl, IEnumerable<string> queryParameters, TRequest body)
         {
-            var request = await PrepareRequestAsync(httpMethod, relativeUrl, body, queryParameters).ConfigureAwait(false);
+            var request = await PrepareRequestAsync(httpMethod, relativeUrl, queryParameters, body).ConfigureAwait(false);
             var response = await HttpClient.SendAsync(request).ConfigureAwait(false);
             return await GetResponseContentAsync(response).ConfigureAwait(false);
         }
@@ -77,7 +77,7 @@ namespace LCUSharp.Http
         /// <returns>The deserialized response.</returns>
         public async Task<TResponse> GetResponseAsync<TResponse>(HttpMethod httpMethod, string relativeUrl, IEnumerable<string> queryParameters = null)
         {
-            return await GetResponseAsync<object, TResponse>(httpMethod, relativeUrl, null, queryParameters).ConfigureAwait(false);
+            return await GetResponseAsync<object, TResponse>(httpMethod, relativeUrl, queryParameters, null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -87,12 +87,12 @@ namespace LCUSharp.Http
         /// <typeparam name="TResponse">The object to deserialize the response into.</typeparam>
         /// <param name="httpMethod">The <see cref="HttpMethod"/>/</param>
         /// <param name="relativeUrl">The relative url.</param>
-        /// <param name="body">The request's body.</param>
         /// <param name="queryParameters">The query parameters.</param>
+        /// <param name="body">The request's body.</param>
         /// <returns>The deserialized response.</returns>
-        public async Task<TResponse> GetResponseAsync<TRequest, TResponse>(HttpMethod httpMethod, string relativeUrl, TRequest body, IEnumerable<string> queryParameters = null)
+        public async Task<TResponse> GetResponseAsync<TRequest, TResponse>(HttpMethod httpMethod, string relativeUrl, IEnumerable<string> queryParameters, TRequest body)
         {
-            var json = await GetJsonResponseAsync(httpMethod, relativeUrl, body, queryParameters).ConfigureAwait(false);
+            var json = await GetJsonResponseAsync(httpMethod, relativeUrl, queryParameters, body).ConfigureAwait(false);
             return await Task.Run(() => JsonConvert.DeserializeObject<TResponse>(json)).ConfigureAwait(false);
         }
     }

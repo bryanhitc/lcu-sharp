@@ -39,7 +39,7 @@ namespace LCUSharp.Http
         /// <param name="body">The request's body.</param>
         /// <param name="queryParameters">The query parameters.</param>
         /// <returns></returns>
-        protected async Task<HttpRequestMessage> PrepareRequestAsync<TRequest>(HttpMethod httpMethod, string relativeUrl, TRequest body, IEnumerable<string> queryParameters)
+        protected async Task<HttpRequestMessage> PrepareRequestAsync<TRequest>(HttpMethod httpMethod, string relativeUrl, IEnumerable<string> queryParameters, TRequest body)
         {
             var url = queryParameters == null
                 ? relativeUrl
