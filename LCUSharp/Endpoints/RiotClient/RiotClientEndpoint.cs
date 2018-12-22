@@ -1,13 +1,10 @@
 ﻿using LCUSharp.Http;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace LCUSharp.Endpoints.RiotClient
 {
-    /// <summary>
-    /// Handles operations relating to the riotclient endpoint.
-    /// </summary>
+    /// <inheritdoc cref="IRiotClientEndpoint"/>
     internal class RiotClientEndpoint : EndpointBase, IRiotClientEndpoint
     {
         private const string BaseUrl = "riotclient/";

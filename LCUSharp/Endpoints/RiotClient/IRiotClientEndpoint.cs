@@ -2,6 +2,9 @@
 
 namespace LCUSharp.Endpoints.RiotClient
 {
+    /// <summary>
+    /// Handles operations relating to the riotclient endpoint.
+    /// </summary>
     public interface IRiotClientEndpoint
     {
         /// <summary>
