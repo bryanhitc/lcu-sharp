@@ -25,13 +25,5 @@ namespace LCUSharp.Websocket
         /// </summary>
         [JsonProperty("uri")]
         public string Uri { get; set; }
-
-        //[JsonConstructor]
-        //public LeagueEvent(JToken data, string eventType, string uri)
-        //{
-        //    Data = data;
-        //    EventType = eventType;
-        //    Uri = uri;
-        //}
     }
 }
