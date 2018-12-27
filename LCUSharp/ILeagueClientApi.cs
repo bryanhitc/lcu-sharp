@@ -1,6 +1,7 @@
 ﻿using LCUSharp.Endpoints.ProcessControl;
 using LCUSharp.Endpoints.RiotClient;
 using LCUSharp.Http;
+using LCUSharp.Websocket;
 
 namespace LCUSharp
 {
@@ -13,6 +14,11 @@ namespace LCUSharp
         /// The request handler.
         /// </summary>
         LeagueRequestHandler RequestHandler { get; }
+
+        /// <summary>
+        /// The event handler.
+        /// </summary>
+        ILeagueEventHandler EventHandler { get; }
 
         /// <summary>
         /// The riot client endpoint.
