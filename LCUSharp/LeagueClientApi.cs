@@ -1,8 +1,7 @@
-﻿using LCUSharp.Endpoints.ProcessControl;
-using LCUSharp.Endpoints.RiotClient;
-using LCUSharp.Utility.Http;
+﻿using LCUSharp.Http;
+using LCUSharp.Http.Endpoints;
 using LCUSharp.Utility;
-using LCUSharp.Utility.Websocket;
+using LCUSharp.Websocket;
 using System;
 using System.Threading.Tasks;
 
@@ -24,7 +23,6 @@ namespace LCUSharp
 
         /// <inheritdoc />
         public IProcessControlEndpoint ProcessControlEndpoint { get; }
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LeagueClientApi"/> class.
