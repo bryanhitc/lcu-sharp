@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace LCUSharp.Endpoints.ProcessControl
+namespace LCUSharp.Http.Endpoints
 {
     /// <summary>
     /// Handles operations relating to the process-control endpoint.

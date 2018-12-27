@@ -1,22 +1,20 @@
-﻿using LCUSharp.Http;
-
-namespace LCUSharp.Endpoints
+﻿namespace LCUSharp.Http.Endpoints
 {
     /// <summary>
     /// An endpoint within the league client's API.
     /// </summary>
-    public abstract class EndpointBase
+    internal abstract class EndpointBase
     {
         /// <summary>
         /// The request handler.
         /// </summary>
-        protected LeagueRequestHandler RequestHandler { get; set; }
+        protected ILeagueRequestHandler RequestHandler { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EndpointBase"/> class.
         /// </summary>
         /// <param name="requestHandler">The request handler.</param>
-        public EndpointBase(LeagueRequestHandler requestHandler)
+        public EndpointBase(ILeagueRequestHandler requestHandler)
         {
             RequestHandler = requestHandler;
         }

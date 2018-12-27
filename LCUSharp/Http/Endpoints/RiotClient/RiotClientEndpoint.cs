@@ -1,8 +1,7 @@
-﻿using LCUSharp.Http;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace LCUSharp.Endpoints.RiotClient
+namespace LCUSharp.Http.Endpoints
 {
     /// <inheritdoc cref="IRiotClientEndpoint"/>
     internal class RiotClientEndpoint : EndpointBase, IRiotClientEndpoint
@@ -12,7 +11,7 @@ namespace LCUSharp.Endpoints.RiotClient
         /// <summary>
         /// Initializes a new instance of the <see cref="RiotClientEndpoint"/> class.
         /// </summary>
-        public RiotClientEndpoint(LeagueRequestHandler requestHandler)
+        public RiotClientEndpoint(ILeagueRequestHandler requestHandler)
             : base(requestHandler)
         {
         }

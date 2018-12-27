@@ -1,9 +1,8 @@
-﻿using LCUSharp.Http;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace LCUSharp.Endpoints.ProcessControl
+namespace LCUSharp.Http.Endpoints
 {
     /// <inheritdoc cref="IProcessControlEndpoint"/>
     internal class ProcessControlEndpoint : EndpointBase, IProcessControlEndpoint
@@ -13,7 +12,7 @@ namespace LCUSharp.Endpoints.ProcessControl
         /// <summary>
         /// Initializes a new instance of the <see cref="RiotClientEndpoint"/> class.
         /// </summary>
-        public ProcessControlEndpoint(LeagueRequestHandler requestHandler)
+        public ProcessControlEndpoint(ILeagueRequestHandler requestHandler)
             : base(requestHandler)
         {
         }

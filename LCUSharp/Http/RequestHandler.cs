@@ -10,7 +10,7 @@ namespace LCUSharp.Http
     /// <summary>
     /// A request handler that supports authentication.
     /// </summary>
-    public abstract class RequestHandler
+    internal abstract class RequestHandler
     {
         /// <summary>
         /// The HttpClient used to make requests.
