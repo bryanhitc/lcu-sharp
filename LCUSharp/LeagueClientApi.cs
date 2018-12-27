@@ -1,8 +1,8 @@
 ﻿using LCUSharp.Endpoints.ProcessControl;
 using LCUSharp.Endpoints.RiotClient;
-using LCUSharp.Http;
+using LCUSharp.Utility.Http;
 using LCUSharp.Utility;
-using LCUSharp.Websocket;
+using LCUSharp.Utility.Websocket;
 using System;
 using System.Threading.Tasks;
 
@@ -14,7 +14,7 @@ namespace LCUSharp
         public event EventHandler Disconnected;
 
         /// <inheritdoc />
-        public LeagueRequestHandler RequestHandler { get; }
+        public ILeagueRequestHandler RequestHandler { get; }
 
         /// <inheritdoc />
         public ILeagueEventHandler EventHandler { get; }
@@ -31,9 +31,9 @@ namespace LCUSharp
         /// </summary>
         /// <param name="port">The league client API's port.</param>
         /// <param name="token">The authentication token.</param>
-        private LeagueClientApi(int port, string token, ILeagueEventHandler eventHandler)
+        private LeagueClientApi(int port, string token, ILeagueRequestHandler requestHandler, ILeagueEventHandler eventHandler)
         {
-            RequestHandler = new LeagueRequestHandler(port, token);
+            RequestHandler = requestHandler;
             EventHandler = eventHandler;
             RiotClientEndpoint = new RiotClientEndpoint(RequestHandler);
             ProcessControlEndpoint = new ProcessControlEndpoint(RequestHandler);
@@ -48,10 +48,11 @@ namespace LCUSharp
             await processHandler.WaitForProcessAsync().ConfigureAwait(false);
             var (port, token) = await lockFileHandler.ParseLockFileAsync(processHandler.BasePath).ConfigureAwait(false);
 
+            var requestHandler = new LeagueRequestHandler(port, token);
             var eventHandler = new LeagueEventHandler(port, token);
             await eventHandler.ConnectAsync().ConfigureAwait(false);
 
-            return new LeagueClientApi(port, token, eventHandler);
+            return new LeagueClientApi(port, token, requestHandler, eventHandler);
         }
 
         /// <summary>

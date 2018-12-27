@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace LCUSharp.Endpoints.RiotClient
+namespace LCUSharp.Http.Endpoints
 {
     /// <summary>
     /// Handles operations relating to the riotclient endpoint.
