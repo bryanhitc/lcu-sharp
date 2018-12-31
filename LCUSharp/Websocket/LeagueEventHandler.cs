@@ -72,13 +72,10 @@ namespace LCUSharp.Websocket
         /// <summary>
         /// Connects to the WebSocket server.
         /// </summary>
-        public async Task ConnectAsync()
+        public void Connect()
         {
-            await Task.Run(() =>
-            {
-                _webSocket.Connect();
-                _webSocket.Send("[5, \"OnJsonApiEvent\"]");
-            }).ConfigureAwait(false);
+            _webSocket.Connect();
+            _webSocket.Send("[5, \"OnJsonApiEvent\"]");
         }
 
         /// <summary>

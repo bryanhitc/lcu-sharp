@@ -48,7 +48,7 @@ namespace LCUSharp
 
             var requestHandler = new LeagueRequestHandler(port, token);
             var eventHandler = new LeagueEventHandler(port, token);
-            await eventHandler.ConnectAsync().ConfigureAwait(false);
+            await Task.Run(() => eventHandler.Connect()).ConfigureAwait(false);
 
             return new LeagueClientApi(port, token, requestHandler, eventHandler);
         }
