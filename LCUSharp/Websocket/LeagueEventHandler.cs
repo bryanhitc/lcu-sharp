@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Authentication;
-using System.Threading.Tasks;
 using WebSocketSharp;
 
 namespace LCUSharp.Websocket
@@ -21,7 +20,7 @@ namespace LCUSharp.Websocket
         /// <summary>
         /// Websocket used to connect to the League Client's backend.
         /// </summary>
-        private readonly WebSocket _webSocket;
+        private WebSocket _webSocket;
 
         /// <inheritdoc />
         public EventHandler<LeagueEvent> MessageReceived { get; set; }
@@ -37,7 +36,25 @@ namespace LCUSharp.Websocket
         public LeagueEventHandler(int port, string token)
         {
             _subscribers = new Dictionary<string, List<EventHandler<LeagueEvent>>>();
+            ChangeSettings(port, token);
+        }
 
+        /// <inheritdoc />
+        public void Connect()
+        {
+            _webSocket.Connect();
+            _webSocket.Send("[5, \"OnJsonApiEvent\"]");
+        }
+
+        /// <inheritdoc />
+        public void Disconnect()
+        {
+            _webSocket.Close();
+        }
+
+        /// <inheritdoc />
+        public void ChangeSettings(int port, string token)
+        {
             _webSocket = new WebSocket($"wss://127.0.0.1:{port}/", "wamp");
             _webSocket.SetCredentials("riot", token, true);
             _webSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
@@ -67,15 +84,6 @@ namespace LCUSharp.Websocket
         public void UnsubscribeAll()
         {
             _subscribers.Clear();
-        }
-
-        /// <summary>
-        /// Connects to the WebSocket server.
-        /// </summary>
-        public void Connect()
-        {
-            _webSocket.Connect();
-            _webSocket.Send("[5, \"OnJsonApiEvent\"]");
         }
 
         /// <summary>

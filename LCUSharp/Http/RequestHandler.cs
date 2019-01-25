@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,22 +13,33 @@ namespace LCUSharp.Http
     /// </summary>
     internal abstract class RequestHandler
     {
+        private readonly HttpClientHandler _httpClientHandler;
+
         /// <summary>
         /// The HttpClient used to make requests.
         /// </summary>
-        protected HttpClient HttpClient { get; }
+        protected HttpClient HttpClient { get; private set; }
 
         /// <summary>
         /// Creates a new instance of the <see cref="RequestHandler"/> class.
         /// </summary>
         public RequestHandler()
         {
-            var httpHandler = new HttpClientHandler
+            _httpClientHandler = new HttpClientHandler
             {
                 ClientCertificateOptions = ClientCertificateOption.Manual
             };
-            httpHandler.ServerCertificateCustomValidationCallback = (response, cert, chain, errors) => true;
-            HttpClient = new HttpClient(httpHandler);
+            _httpClientHandler.ServerCertificateCustomValidationCallback = (response, cert, chain, errors) => true;
+            CreateHttpClient();
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="HttpClient"/>.
+        /// </summary>
+        protected void CreateHttpClient()
+        {
+            HttpClient = new HttpClient(_httpClientHandler);
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         /// <summary>

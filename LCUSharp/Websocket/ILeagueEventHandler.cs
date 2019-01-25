@@ -18,6 +18,23 @@ namespace LCUSharp.Websocket
         EventHandler<string> ErrorReceived { get; set; }
 
         /// <summary>
+        /// Connects to the WebSocket server.
+        /// </summary>
+        void Connect();
+
+        /// <summary>
+        /// Disconnects from the WebSocket server.
+        /// </summary>
+        void Disconnect();
+
+        /// <summary>
+        /// Initializes the web socket listener.
+        /// </summary>
+        /// <param name="port">The league client's port.</param>
+        /// <param name="token">The user's Basic authentication token.</param>
+        void ChangeSettings(int port, string token);
+
+        /// <summary>
         /// Subscribes the event handler to the specified event uri.
         /// </summary>
         /// <param name="uri">The league client event uri.</param>

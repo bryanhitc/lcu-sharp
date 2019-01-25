@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LCUSharp.Utility
@@ -35,32 +36,30 @@ namespace LCUSharp.Utility
         /// <summary>
         /// Waits for the league client's process to start.
         /// </summary>
-        /// <returns></returns>
-        public async Task WaitForProcessAsync()
+        /// <returns>True if the process was found successfully, otherwise false.</returns>
+        public bool WaitForProcess()
         {
-            await Task.Run(async () =>
+            while (true)
             {
-                while (true)
+                var processes = Process.GetProcessesByName(ProcessName);
+                if (processes.Length > 0)
                 {
-                    var processes = Process.GetProcessesByName(ProcessName);
+                    if (Process != null)
+                        Process.Exited -= OnProcessExited;
 
-                    if (processes.Length > 0)
-                    {
-                        if (Process != null)
-                            Process.Exited -= OnProcessExited;
+                    Process = processes[0];
+                    Process.EnableRaisingEvents = true;
+                    Process.Exited += OnProcessExited;
 
-                        Process = processes[0];
-                        Process.EnableRaisingEvents = true;
-                        Process.Exited += OnProcessExited;
-
-                        ExecutablePath = Path.GetDirectoryName(Process.MainModule.FileName);
-                        BasePath = new DirectoryInfo(ExecutablePath).Parent.Parent.Parent.Parent.Parent.Parent.FullName;
-                        break;
-                    }
-
-                    await Task.Delay(500).ConfigureAwait(false);
+                    ExecutablePath = Path.GetDirectoryName(Process.MainModule.FileName);
+                    BasePath = new DirectoryInfo(ExecutablePath).Parent.Parent.Parent.Parent.Parent.Parent.FullName;
+                    break;
                 }
-            });
+
+                Thread.Sleep(100);
+            }
+
+            return true;
         }
 
         /// <summary>

@@ -1,6 +1,8 @@
 ﻿using LCUSharp.Http;
 using LCUSharp.Http.Endpoints;
 using LCUSharp.Websocket;
+using System;
+using System.Threading.Tasks;
 
 namespace LCUSharp
 {
@@ -9,6 +11,11 @@ namespace LCUSharp
     /// </summary>
     public interface ILeagueClientApi
     {
+        /// <summary>
+        /// Triggered when the client disconnects from the api.
+        /// </summary>
+        event EventHandler Disconnected;
+
         /// <summary>
         /// The request handler.
         /// </summary>
@@ -28,5 +35,15 @@ namespace LCUSharp
         /// The process control endpoint.
         /// </summary>
         IProcessControlEndpoint ProcessControlEndpoint { get; }
+
+        /// <summary>
+        /// Reconnects to the league client api.
+        /// </summary>
+        Task ReconnectAsync();
+
+        /// <summary>
+        /// Disconnect from the league client api.
+        /// </summary>
+        void Disconnect();
     }
 }

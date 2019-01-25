@@ -3,6 +3,7 @@ using LCUSharp.Http.Endpoints;
 using LCUSharp.Utility;
 using LCUSharp.Websocket;
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace LCUSharp
@@ -10,6 +11,10 @@ namespace LCUSharp
     /// <inheritdoc />
     public class LeagueClientApi : ILeagueClientApi
     {
+        private static readonly LeagueProcessHandler _processHandler;
+        private static readonly LockFileHandler _lockFileHandler;
+
+        /// <inheritdoc />
         public event EventHandler Disconnected;
 
         /// <inheritdoc />
@@ -25,42 +30,100 @@ namespace LCUSharp
         public IProcessControlEndpoint ProcessControlEndpoint { get; }
 
         /// <summary>
+        /// Initializes the necessary handlers.
+        /// </summary>
+        static LeagueClientApi()
+        {
+            _processHandler = new LeagueProcessHandler();
+            _lockFileHandler = new LockFileHandler();
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="LeagueClientApi"/> class.
         /// </summary>
         /// <param name="port">The league client API's port.</param>
         /// <param name="token">The authentication token.</param>
-        private LeagueClientApi(int port, string token, ILeagueRequestHandler requestHandler, ILeagueEventHandler eventHandler)
+        /// <param name="eventHandler">The event handler.</param>
+        private LeagueClientApi(int port, string token, ILeagueEventHandler eventHandler)
         {
-            RequestHandler = requestHandler;
             EventHandler = eventHandler;
+            RequestHandler = new LeagueRequestHandler(port, token);
             RiotClientEndpoint = new RiotClientEndpoint(RequestHandler);
             ProcessControlEndpoint = new ProcessControlEndpoint(RequestHandler);
-        }
-
-        /// <inheritdoc />
-        public static async Task<LeagueClientApi> ConnectAsync()
-        {
-            var processHandler = new LeagueProcessHandler();
-            var lockFileHandler = new LockFileHandler();
-
-            await processHandler.WaitForProcessAsync().ConfigureAwait(false);
-            var (port, token) = await lockFileHandler.ParseLockFileAsync(processHandler.BasePath).ConfigureAwait(false);
-
-            var requestHandler = new LeagueRequestHandler(port, token);
-            var eventHandler = new LeagueEventHandler(port, token);
-            await Task.Run(() => eventHandler.Connect()).ConfigureAwait(false);
-
-            return new LeagueClientApi(port, token, requestHandler, eventHandler);
+            _processHandler.Exited += OnDisconnected;
         }
 
         /// <summary>
-        /// Called when the league client is exited.
+        /// Connects to the league client api.
+        /// </summary>
+        /// <returns>A new instance of <see cref="LeagueClientApi" /> that's connected to the client api.</returns>
+        public static async Task<LeagueClientApi> ConnectAsync()
+        {
+            var (port, token) = await GetAuthCredentialsAsync().ConfigureAwait(false);
+            var eventHandler = new LeagueEventHandler(port, token);
+            var api = new LeagueClientApi(port, token, eventHandler);
+            return await EnsureConnectionAsync(api).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task ReconnectAsync()
+        {
+            var (port, token) = await GetAuthCredentialsAsync().ConfigureAwait(false);
+            await Task.Run(() =>
+            {
+                RequestHandler.ChangeSettings(port, token);
+                EventHandler.ChangeSettings(port, token);
+            }).ConfigureAwait(false);
+            await EnsureConnectionAsync(this).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public void Disconnect()
+        {
+            OnDisconnected(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Gets the league client api authentication credentials.
+        /// </summary>
+        /// <returns>The port and auth token.</returns>
+        private static async Task<(int port, string token)> GetAuthCredentialsAsync()
+        {
+            await Task.Run(() => _processHandler.WaitForProcess()).ConfigureAwait(false);
+            return await _lockFileHandler.ParseLockFileAsync(_processHandler.BasePath).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Ensures the connection is successful by sending a test request.
+        /// </summary>
+        /// <param name="api">The league client api.</param>
+        /// <returns>The league client api.</returns>
+        private static async Task<LeagueClientApi> EnsureConnectionAsync(LeagueClientApi api)
+        {
+            while (true)
+            {
+                try
+                {
+                    await api.RequestHandler.GetResponseAsync<string>(HttpMethod.Get, "/riotclient/app-name").ConfigureAwait(false);
+                    await Task.Run(() => api.EventHandler.Connect()).ConfigureAwait(false);
+                    return api;
+                }
+                catch (Exception)
+                {
+                    await Task.Delay(100).ConfigureAwait(false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Invoked when the client is disconnected from the api.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event arguments.</param>
-        private void OnProcessExited(object sender, EventArgs e)
+        private async void OnDisconnected(object sender, EventArgs e)
         {
-            Disconnected?.Invoke(sender, e);
+            await Task.Run(() => EventHandler.Disconnect()).ConfigureAwait(false);
+            Disconnected?.Invoke(this, EventArgs.Empty);
         }
     }
 }
