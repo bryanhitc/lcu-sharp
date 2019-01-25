@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using LCUSharp.Utility;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace LCUSharp.Http
 {
+    /// <inheritdoc cref="ILeagueRequestHandler" />
     internal class LeagueRequestHandler : RequestHandler, ILeagueRequestHandler
     {
         /// <inheritdoc />
@@ -23,11 +25,17 @@ namespace LCUSharp.Http
         /// <param name="token">The user's Basic authentication token.</param>
         public LeagueRequestHandler(int port, string token)
         {
+            ChangeSettings(port, token);
+        }
+
+        /// <inheritdoc />
+        public void ChangeSettings(int port, string token)
+        {
             Port = port;
             Token = token;
+            CreateHttpClient();
 
             var authTokenBytes = Encoding.ASCII.GetBytes($"riot:{token}");
-            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authTokenBytes));
             HttpClient.BaseAddress = new Uri($"https://127.0.0.1:{port}/");
         }
@@ -43,6 +51,7 @@ namespace LCUSharp.Http
         {
             var request = await PrepareRequestAsync(httpMethod, relativeUrl, queryParameters, body).ConfigureAwait(false);
             var response = await HttpClient.SendAsync(request).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
             return await GetResponseContentAsync(response).ConfigureAwait(false);
         }
 

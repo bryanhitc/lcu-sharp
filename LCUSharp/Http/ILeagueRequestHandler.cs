@@ -20,6 +20,13 @@ namespace LCUSharp.Http
         string Token { get; set; }
 
         /// <summary>
+        /// Changes the request handler's settings.
+        /// </summary>
+        /// <param name="port">The league client's port.</param>
+        /// <param name="token">The user's Basic authentication token.</param>
+        void ChangeSettings(int port, string token);
+
+        /// <summary>
         /// Creates and sends a new <see cref="HttpRequestMessage"/> and returns the <see cref="HttpResponseMessage"/>'s content.
         /// </summary>
         /// <param name="httpMethod">The <see cref="HttpMethod"/>.</param>
