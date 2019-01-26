@@ -17,6 +17,11 @@ namespace LCUSharp
         event EventHandler Disconnected;
 
         /// <summary>
+        /// Triggered when the client connects from the api.
+        /// </summary>
+        event EventHandler Connected;
+
+        /// <summary>
         /// The request handler.
         /// </summary>
         ILeagueRequestHandler RequestHandler { get; }

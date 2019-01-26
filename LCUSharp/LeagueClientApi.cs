@@ -18,6 +18,9 @@ namespace LCUSharp
         public event EventHandler Disconnected;
 
         /// <inheritdoc />
+        public event EventHandler Connected;
+
+        /// <inheritdoc />
         public ILeagueRequestHandler RequestHandler { get; }
 
         /// <inheritdoc />
@@ -105,7 +108,7 @@ namespace LCUSharp
                 try
                 {
                     await api.RequestHandler.GetResponseAsync<string>(HttpMethod.Get, "/riotclient/app-name").ConfigureAwait(false);
-                    await Task.Run(() => api.EventHandler.Connect()).ConfigureAwait(false);
+                    api.OnConnected(typeof(LeagueClientApi), EventArgs.Empty);
                     return api;
                 }
                 catch (Exception)
@@ -124,6 +127,17 @@ namespace LCUSharp
         {
             await Task.Run(() => EventHandler.Disconnect()).ConfigureAwait(false);
             Disconnected?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Invoked when the client is connected to the api
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The event arguments</param>
+        private async void OnConnected(object sender, EventArgs e)
+        {
+            await Task.Run(() => EventHandler.Connect()).ConfigureAwait(false);
+            Connected?.Invoke(this, EventArgs.Empty);
         }
     }
 }
