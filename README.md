@@ -70,4 +70,4 @@ private void OnGameFlowChanged(object sender, LeagueEvent e)
 }
 ```
 
-![Usage Event Run](https://i.imgur.com/EUcqv4u.gif)
+![Usage Event Run](https://i.imgur.com/mavltPs.gif)
