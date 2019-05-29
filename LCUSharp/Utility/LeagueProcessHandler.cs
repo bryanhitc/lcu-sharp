@@ -24,11 +24,6 @@ namespace LCUSharp.Utility
         public Process Process { get; private set; }
 
         /// <summary>
-        /// The league client's root installation path.
-        /// </summary>
-        public string BasePath { get; private set; }
-
-        /// <summary>
         /// The league client's executable path.
         /// </summary>
         public string ExecutablePath { get; private set; }
@@ -52,7 +47,6 @@ namespace LCUSharp.Utility
                     Process.Exited += OnProcessExited;
 
                     ExecutablePath = Path.GetDirectoryName(Process.MainModule.FileName);
-                    BasePath = new DirectoryInfo(ExecutablePath).Parent.Parent.Parent.Parent.Parent.Parent.FullName;
                     break;
                 }
 

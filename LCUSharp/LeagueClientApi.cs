@@ -90,7 +90,7 @@ namespace LCUSharp
         private static async Task<(int port, string token)> GetAuthCredentialsAsync()
         {
             await Task.Run(() => _processHandler.WaitForProcess()).ConfigureAwait(false);
-            return await _lockFileHandler.ParseLockFileAsync(_processHandler.BasePath).ConfigureAwait(false);
+            return await _lockFileHandler.ParseLockFileAsync(_processHandler.ExecutablePath).ConfigureAwait(false);
         }
 
         /// <summary>
