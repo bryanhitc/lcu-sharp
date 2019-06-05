@@ -37,9 +37,7 @@ namespace LCUSharp.Http.Endpoints
         /// <inheritdoc />
         public async Task KillUxAsync()
         {
-            {
-                await RequestHandler.GetJsonResponseAsync(HttpMethod.Post, $"{BaseUrl}kill-ux").ConfigureAwait(false);
-            }
+            await RequestHandler.GetJsonResponseAsync(HttpMethod.Post, $"{BaseUrl}kill-ux").ConfigureAwait(false);
         }
 
         /// <inheritdoc />
