@@ -71,3 +71,9 @@ private void OnGameFlowChanged(object sender, LeagueEvent e)
 ```
 
 ![Usage Event Run](https://i.imgur.com/mavltPs.gif)
+
+## License
+
+Copyright (c) 2020 Bryan Hitchcock. All rights reserved.
+
+Licensed under the [MIT](./LICENSE.txt) license.
