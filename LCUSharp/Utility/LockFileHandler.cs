@@ -50,7 +50,9 @@ namespace LCUSharp.Utility
         {
             var filePath = Path.Combine(path, FileName);
             if (File.Exists(filePath))
+            {
                 return filePath;
+            }
 
             var fileCreated = new TaskCompletionSource<bool>();
             var fileWatcher = new FileSystemWatcher(path);
