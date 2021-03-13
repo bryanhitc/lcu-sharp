@@ -50,7 +50,7 @@ namespace LCUSharp
             RequestHandler = new LeagueRequestHandler(port, token);
             RiotClientEndpoint = new RiotClientEndpoint(RequestHandler);
             ProcessControlEndpoint = new ProcessControlEndpoint(RequestHandler);
-            _processHandler.Exited += OnDisconnected;
+            _processHandler.Closed += OnDisconnected;
         }
 
         /// <summary>
@@ -69,11 +69,10 @@ namespace LCUSharp
         public async Task ReconnectAsync()
         {
             var (port, token) = await GetAuthCredentialsAsync().ConfigureAwait(false);
-            await Task.Run(() =>
-            {
-                RequestHandler.ChangeSettings(port, token);
-                EventHandler.ChangeSettings(port, token);
-            }).ConfigureAwait(false);
+
+            RequestHandler.ChangeSettings(port, token);
+            EventHandler.ChangeSettings(port, token);
+
             await EnsureConnectionAsync(this).ConfigureAwait(false);
         }
 
@@ -89,7 +88,7 @@ namespace LCUSharp
         /// <returns>The port and auth token.</returns>
         private static async Task<(int port, string token)> GetAuthCredentialsAsync()
         {
-            await Task.Run(() => _processHandler.WaitForProcess()).ConfigureAwait(false);
+            await _processHandler.WaitForProcessAsync().ConfigureAwait(false);
             return await _lockFileHandler.ParseLockFileAsync(_processHandler.ExecutablePath).ConfigureAwait(false);
         }
 
@@ -104,13 +103,24 @@ namespace LCUSharp
             {
                 try
                 {
-                    await api.RequestHandler.GetResponseAsync<string>(HttpMethod.Get, "/riotclient/app-name").ConfigureAwait(false);
-                    await Task.Run(() => api.EventHandler.Connect()).ConfigureAwait(false);
+                    await api.RequestHandler
+                        .GetResponseAsync<string>(HttpMethod.Get, "/riotclient/app-name")
+                        .ConfigureAwait(false);
+
+                    var delay = Task.Delay(200);
+                    var connect = api.EventHandler.ConnectAsync();
+
+                    var finished = await Task.WhenAny(delay, connect).ConfigureAwait(false);
+                    if (finished == delay)
+                    {
+                        continue;
+                    }
+
                     return api;
                 }
                 catch (Exception)
                 {
-                    await Task.Delay(100).ConfigureAwait(false);
+                    await Task.Delay(200).ConfigureAwait(false);
                 }
             }
         }
@@ -122,7 +132,7 @@ namespace LCUSharp
         /// <param name="e">The event arguments.</param>
         private async void OnDisconnected(object sender, EventArgs e)
         {
-            await Task.Run(() => EventHandler.Disconnect()).ConfigureAwait(false);
+            await EventHandler.DisconnectAsync().ConfigureAwait(false);
             Disconnected?.Invoke(this, EventArgs.Empty);
         }
     }

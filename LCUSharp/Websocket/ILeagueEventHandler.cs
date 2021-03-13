@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace LCUSharp.Websocket
 {
@@ -20,12 +21,12 @@ namespace LCUSharp.Websocket
         /// <summary>
         /// Connects to the WebSocket server.
         /// </summary>
-        void Connect();
+        Task ConnectAsync();
 
         /// <summary>
         /// Disconnects from the WebSocket server.
         /// </summary>
-        void Disconnect();
+        Task<bool> DisconnectAsync();
 
         /// <summary>
         /// Initializes the web socket listener.
@@ -45,7 +46,8 @@ namespace LCUSharp.Websocket
         /// Unsubscribes the event handlers subscribed to the specified event uri.
         /// </summary>
         /// <param name="uri">The uri to unsubscribe from.</param>
-        void Unsubscribe(string uri);
+        /// <returns>True if the uri exists and was unsubscribed successfully, otherwise false.</returns>
+        bool Unsubscribe(string uri);
 
         /// <summary>
         /// Unsubcribes all event handlers.

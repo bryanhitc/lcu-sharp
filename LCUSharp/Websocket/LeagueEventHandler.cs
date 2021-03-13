@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Security.Authentication;
-using WebSocketSharp;
+using System.Net;
+using System.Net.WebSockets;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using Websocket.Client;
 
 namespace LCUSharp.Websocket
 {
@@ -18,9 +21,9 @@ namespace LCUSharp.Websocket
         private readonly Dictionary<string, List<EventHandler<LeagueEvent>>> _subscribers;
 
         /// <summary>
-        /// Websocket used to connect to the League Client's backend.
+        /// Websocket client used to connect to the League Client's backend.
         /// </summary>
-        private WebSocket _webSocket;
+        private WebsocketClient _webSocket;
 
         /// <inheritdoc />
         public EventHandler<LeagueEvent> MessageReceived { get; set; }
@@ -40,88 +43,88 @@ namespace LCUSharp.Websocket
         }
 
         /// <inheritdoc />
-        public void Connect()
+        public async Task ConnectAsync()
         {
-            _webSocket.Connect();
-            _webSocket.Send("[5, \"OnJsonApiEvent\"]");
+            await _webSocket.Start();
+            await _webSocket.SendInstant("[5, \"OnJsonApiEvent\"]");
         }
 
         /// <inheritdoc />
-        public void Disconnect()
+        public async Task<bool> DisconnectAsync()
         {
-            _webSocket.Close();
+            return await _webSocket.Stop(WebSocketCloseStatus.NormalClosure,
+                "User requested to close the connection.");
         }
 
         /// <inheritdoc />
         public void ChangeSettings(int port, string token)
         {
-            _webSocket = new WebSocket($"wss://127.0.0.1:{port}/", "wamp");
-            _webSocket.SetCredentials("riot", token, true);
-            _webSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
-            _webSocket.SslConfiguration.ServerCertificateValidationCallback = (response, cert, chain, errors) => true;
+            _webSocket = new WebsocketClient(new Uri($"wss://127.0.0.1:{port}/"), () =>
+            {
+                var socket = new ClientWebSocket
+                {
+                    Options =
+                    {
+                        Credentials = new NetworkCredential("riot", token),
+                        RemoteCertificateValidationCallback =
+                            (sender, cert, chain, sslPolicyErrors) => true,
+                    }
+                };
 
-            _webSocket.OnError += OnError;
-            _webSocket.OnMessage += OnMessage;
+                socket.Options.AddSubProtocol("wamp");
+                return socket;
+            });
+
+            _webSocket
+                .MessageReceived
+                .Where(msg => msg.Text != null)
+                .Where(msg => msg.Text.StartsWith('['))
+                .Subscribe(msg =>
+                {
+                    // Check if the message is json received from the client
+                    var eventArray = JArray.Parse(msg.Text);
+                    var eventNumber = eventArray?[0].ToObject<int>();
+
+                    if (eventNumber != ClientEventNumber)
+                    {
+                        return;
+                    }
+
+                    var leagueEvent = eventArray[ClientEventData].ToObject<LeagueEvent>();
+                    MessageReceived?.Invoke(this, leagueEvent);
+
+                    if (!_subscribers.TryGetValue(leagueEvent.Uri, out var eventHandlers))
+                    {
+                        return;
+                    }
+
+                    eventHandlers.ForEach(eventHandler => eventHandler?.Invoke(this, leagueEvent));
+                });
         }
 
         /// <inheritdoc />
         public void Subscribe(string uri, EventHandler<LeagueEvent> eventHandler)
         {
-            if (_subscribers.TryGetValue(uri, out List<EventHandler<LeagueEvent>> eventHandlers))
+            if (_subscribers.TryGetValue(uri, out var eventHandlers))
+            {
                 eventHandlers.Add(eventHandler);
+            }
             else
+            {
                 _subscribers.Add(uri, new List<EventHandler<LeagueEvent>> { eventHandler });
+            }
         }
 
         /// <inheritdoc />
-        public void Unsubscribe(string uri)
+        public bool Unsubscribe(string uri)
         {
-            if (_subscribers.ContainsKey(uri))
-                _subscribers.Remove(uri);
+            return _subscribers.Remove(uri);
         }
 
         /// <inheritdoc />
         public void UnsubscribeAll()
         {
             _subscribers.Clear();
-        }
-
-        /// <summary>
-        /// Called when an error is received from the client.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The error arguments.</param>
-        private void OnError(object sender, ErrorEventArgs e)
-        {
-            ErrorReceived?.Invoke(sender, e.Message);
-        }
-
-        /// <summary>
-        /// Called when a message is received from the client.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The message arguments.</param>
-        private void OnMessage(object sender, MessageEventArgs e)
-        {
-            // Check if the message is json received from the client
-            if (e.IsText)
-            {
-                var eventArray = JArray.Parse(e.Data);
-                var eventNumber = eventArray[0].ToObject<int>();
-
-                if (eventNumber == ClientEventNumber)
-                {
-                    var leagueEvent = eventArray[ClientEventData].ToObject<LeagueEvent>();
-                    MessageReceived?.Invoke(sender, leagueEvent);
-
-                    // Call subscribers
-                    if (_subscribers.TryGetValue(leagueEvent.Uri, out List<EventHandler<LeagueEvent>> eventHandlers))
-                    {
-                        foreach (var eventHandler in eventHandlers)
-                            eventHandler?.Invoke(sender, leagueEvent);
-                    }
-                }
-            }
         }
     }
 }

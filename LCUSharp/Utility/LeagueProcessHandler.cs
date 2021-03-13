@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace LCUSharp.Utility
@@ -14,9 +13,9 @@ namespace LCUSharp.Utility
         private const string ProcessName = "LeagueClientUx";
 
         /// <summary>
-        /// Triggers when the league client is exited.
+        /// Triggers when the league client is closed.
         /// </summary>
-        public event EventHandler Exited;
+        public event EventHandler Closed;
 
         /// <summary>
         /// The league client's process.
@@ -32,7 +31,7 @@ namespace LCUSharp.Utility
         /// Waits for the league client's process to start.
         /// </summary>
         /// <returns>True if the process was found successfully, otherwise false.</returns>
-        public bool WaitForProcess()
+        public async Task<bool> WaitForProcessAsync()
         {
             while (true)
             {
@@ -40,7 +39,9 @@ namespace LCUSharp.Utility
                 if (processes.Length > 0)
                 {
                     if (Process != null)
+                    {
                         Process.Exited -= OnProcessExited;
+                    }
 
                     Process = processes[0];
                     Process.EnableRaisingEvents = true;
@@ -50,20 +51,20 @@ namespace LCUSharp.Utility
                     break;
                 }
 
-                Thread.Sleep(100);
+                await Task.Delay(100).ConfigureAwait(false);
             }
 
             return true;
         }
 
         /// <summary>
-        /// Called when the league client is exited.
+        /// Called when the league client is closed.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event arguments.</param>
         private void OnProcessExited(object sender, EventArgs e)
         {
-            Exited?.Invoke(sender, e);
+            Closed?.Invoke(sender, e);
         }
     }
 }

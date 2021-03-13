@@ -29,7 +29,7 @@ namespace LCUSharp.Utility
             {
                 using (var reader = new StreamReader(fileStream))
                 {
-                    var contents = await reader.ReadToEndAsync();
+                    var contents = await reader.ReadToEndAsync().ConfigureAwait(false);
                     var items = contents.Split(':');
 
                     var processId = int.Parse(items[1]);
@@ -50,7 +50,9 @@ namespace LCUSharp.Utility
         {
             var filePath = Path.Combine(path, FileName);
             if (File.Exists(filePath))
+            {
                 return filePath;
+            }
 
             var fileCreated = new TaskCompletionSource<bool>();
             var fileWatcher = new FileSystemWatcher(path);
@@ -68,7 +70,7 @@ namespace LCUSharp.Utility
             fileWatcher.Created += OnFileCreated;
             fileWatcher.EnableRaisingEvents = true;
 
-            await fileCreated.Task;
+            await fileCreated.Task.ConfigureAwait(false);
             return filePath;
         }
     }

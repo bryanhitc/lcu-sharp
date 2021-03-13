@@ -55,14 +55,30 @@ private void OnGameFlowChanged(object sender, LeagueEvent e)
     var result = e.Data.ToString();
     var state = string.Empty;
 
-    if (result == "None")
-        state = "main menu";
-    else if (result == "ChampSelect")
-        state = "champ select";
-    else if (result == "Lobby")
-        state = "lobby";
-    else if (result == "InProgress")
-        state = "game";
+    switch (result)
+    {
+        case "None":
+            state = "main menu";
+            break;
+        case "Lobby":
+            state = "lobby";
+            break;
+        case "ChampSelect":
+            state = "champ select";
+            break;
+        case "GameStart":
+            state = "game started";
+            break;
+        case "InProgress":
+            state = "game";
+            break;
+        case "WaitingForStats":
+            state = "waiting for stats";
+            break;
+        default:
+            state = $"unknown state: {result}";
+            break;
+    }
 
     // Print new state and set work to complete.
     Console.WriteLine($"Status update: Entered {state}.");
