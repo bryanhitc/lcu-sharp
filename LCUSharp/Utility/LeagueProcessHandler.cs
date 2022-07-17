@@ -17,10 +17,27 @@ namespace LCUSharp.Utility
         /// </summary>
         public event EventHandler Closed;
 
+        private Process _process;
         /// <summary>
         /// The league client's process.
         /// </summary>
-        public Process Process { get; private set; }
+        public Process Process
+        {
+            get { return _process; }
+            private set
+            {
+                if (Process != null)
+                {
+                    Process.Exited -= OnProcessExited;
+                }
+
+                _process = value;
+                Process.EnableRaisingEvents = true;
+                Process.Exited += OnProcessExited;
+
+                ExecutablePath = Path.GetDirectoryName(Process.MainModule.FileName);
+            }
+        }
 
         /// <summary>
         /// The league client's executable path.
@@ -35,26 +52,33 @@ namespace LCUSharp.Utility
         {
             while (true)
             {
-                var processes = Process.GetProcessesByName(ProcessName);
-                if (processes.Length > 0)
+                var newProcess = TryGetProcess();
+                if (newProcess == null)
                 {
-                    if (Process != null)
-                    {
-                        Process.Exited -= OnProcessExited;
-                    }
-
-                    Process = processes[0];
-                    Process.EnableRaisingEvents = true;
-                    Process.Exited += OnProcessExited;
-
-                    ExecutablePath = Path.GetDirectoryName(Process.MainModule.FileName);
-                    break;
+                    await Task.Delay(100).ConfigureAwait(false);
+                    continue;
                 }
 
-                await Task.Delay(100).ConfigureAwait(false);
+                Process = newProcess;
+                return true;
+            }
+        }
+
+        private Process TryGetProcess()
+        {
+            var processes = Process.GetProcessesByName(ProcessName);
+            if (processes.Length <= 0)
+            {
+                return null;
             }
 
-            return true;
+            var newProcess = processes[0];
+            if (newProcess == null || newProcess.MainModule == null)
+            {
+                return null;
+            }
+
+            return newProcess;
         }
 
         /// <summary>
